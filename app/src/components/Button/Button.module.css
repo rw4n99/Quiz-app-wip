@@ -1,5 +1,6 @@
-/* Button.module.css */
 .button {
+    display: flex;
+    justify-content: center;
     width: 310px;
     height: 60px;
     background-color: #007AFF;
@@ -8,8 +9,8 @@
     font-size: 25px;
     border: none;
     cursor: pointer;
-    position: absolute; /* Change this to 'absolute' or other positioning if needed */
-    bottom: 20px; /* Adjust if needed */
+    position: fixed;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
 }

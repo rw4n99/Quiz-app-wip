@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import EndGame from '../EndGame/EndGame';
 import QuestionCards from '../QuestionCards/QuestionCards';
 
 const Timer = ({ onTimerEnd }) => {
@@ -19,8 +20,7 @@ const Timer = ({ onTimerEnd }) => {
         }
       }, 1000);
     }
-
-    // Trigger game over when minutes and seconds both reach 0
+    
     if (minutes === 0 && seconds === 0) {
       clearInterval(interval);
       setIsActive(false);
@@ -32,9 +32,9 @@ const Timer = ({ onTimerEnd }) => {
 
   return (
     <div>
-      <div>
-        {minutes}:{seconds < 10 ? `0${seconds}` : seconds} minutes
-      </div>
+        <div>
+          {minutes}:{seconds < 10 ? `0${seconds}` : seconds} minutes
+        </div>
     </div>
   );
 };

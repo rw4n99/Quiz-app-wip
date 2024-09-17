@@ -16,28 +16,27 @@ export default function QuestionCards() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFail, setShowFail] = useState(false);
   const [endGame, setEndGame] = useState(false);
-
   const [questionCount, setQuestionCount] = useState(0);
-
-  // Fail and score tracker
   const [score, setScore] = useState(0);
-
-  // Lives
   const [lives, setLives] = useState(5);
-  const [isGameOver, setIsGameOver] = useState(false);
-
-  // API
   const [questions, setQuestions] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Random answer box
   const [correctAnswerBox, setCorrectAnswerBox] = useState(null);
+  const [shuffledAnswers, setShuffledAnswers] = useState([]);
 
-  function randomCorrectAnswer() {
+  const randomCorrectAnswer = () => {
     const correctAnswerSelector = Math.floor(Math.random() * 4);
     setCorrectAnswerBox(correctAnswerSelector);
-    return;
+  }
+
+  const shuffleAnswers = (correctAnswer, incorrectAnswers) => {
+    const allAnswers = [...incorrectAnswers, correctAnswer];
+    for (let i = allAnswers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allAnswers[i], allAnswers[j]] = [allAnswers[j], allAnswers[i]];
+    }
+    setShuffledAnswers(allAnswers);
   }
 
   const fetchQuestions = async () => {
@@ -48,6 +47,7 @@ export default function QuestionCards() {
       }
       const data = await response.json();
       setQuestions(data);
+      shuffleAnswers(data[0].correctAnswer, data[0].incorrectAnswers);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -56,7 +56,7 @@ export default function QuestionCards() {
   };
 
   const handleGameOver = () => {
-    setIsGameOver(true);
+    setEndGame(true);
   };
 
   useEffect(() => {
@@ -81,15 +81,12 @@ export default function QuestionCards() {
     }
 
     setSubmit(true);
-    // Pass / fail logic
     if (pass && questionCount < 11 && lives > 0) {
-      // Correct answer
       setScore((prevScore) => prevScore + 1);
       setShowSuccess(true);
       setShowFail(false);
       setQuestionCount((prevCount) => prevCount + 1);
     } else if (!pass && questionCount < 11 && lives > 0) {
-      // Incorrect answer
       setLives((prevLives) => prevLives - 1);
       setShowFail(true);
       setShowSuccess(false);
@@ -110,17 +107,13 @@ export default function QuestionCards() {
 
   const handleAnswerSelect = (selectedAnswerIndex) => {
     setAnswerSelected(true);
-    if (selectedAnswerIndex === correctAnswerBox) {
-      setPass(true);
-    } else {
-      setPass(false);
-    }
+    setPass(shuffledAnswers[selectedAnswerIndex] === questions[0].correctAnswer);
   };
 
   return (
     <div className={styles.wrapper}>
-      {isGameOver || endGame ? (
-        <EndGame score={score} />
+      {endGame ? (
+        <EndGame score={score} lives={lives} />
       ) : (
         <div>
           <Timer onTimerEnd={handleGameOver} />
@@ -129,65 +122,23 @@ export default function QuestionCards() {
             <div className={styles.form}>
               <legend className={styles.title}>{questions[0].question.text}</legend>
 
-              <div className={styles.answerGroup}>
-  <input
-    type="radio"
-    id="Answer1"
-    name="Answer"
-    onClick={() => handleAnswerSelect(0)}
-  />
-  <label className={styles.text} htmlFor="Answer1">
-    {correctAnswerBox === 0
-      ? questions[0].correctAnswer
-      : questions[0].incorrectAnswers[0]}
-  </label>
-</div>
-
-<div className={styles.answerGroup}>
-  <input
-    type="radio"
-    id="Answer2"
-    name="Answer"
-    onClick={() => handleAnswerSelect(1)}
-  />
-  <label className={styles.text} htmlFor="Answer2">
-    {correctAnswerBox === 1
-      ? questions[0].correctAnswer
-      : questions[0].incorrectAnswers[1]}
-  </label>
-</div>
-
-<div className={styles.answerGroup}>
-  <input
-    type="radio"
-    id="Answer3"
-    name="Answer"
-    onClick={() => handleAnswerSelect(2)}
-  />
-  <label className={styles.text} htmlFor="Answer3">
-    {correctAnswerBox === 2
-      ? questions[0].correctAnswer
-      : questions[0].incorrectAnswers[2]}
-  </label>
-</div>
-
-<div className={styles.answerGroup}>
-  <input
-    type="radio"
-    id="Answer4"
-    name="Answer"
-    onClick={() => handleAnswerSelect(3)}
-  />
-  <label className={styles.text} htmlFor="Answer4">
-    {correctAnswerBox === 3
-      ? questions[0].correctAnswer
-      : questions[0].incorrectAnswers[3]}
-  </label>
-</div>
+              {shuffledAnswers.map((answer, index) => (
+                <div key={index} className={styles.answerGroup}>
+                  <input
+                    type="radio"
+                    id={`Answer${index + 1}`}
+                    name="Answer"
+                    onClick={() => handleAnswerSelect(index)}
+                  />
+                  <label className={styles.text} htmlFor={`Answer${index + 1}`}>
+                    {answer}
+                  </label>
+                </div>
+              ))}
             </div>
-
-            <Button onClick={handleClick}>Submit answer</Button>
-
+            <div>
+              <Button onClick={handleClick}>Submit answer</Button>
+            </div>
             <div className={styles.submit}>
               {!answerSelected && submit ? (
                 'Please select an answer'

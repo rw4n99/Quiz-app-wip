@@ -2,8 +2,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 0rem;
-    padding-bottom: 3rem;
     color: white;
     background-color: rgb(78, 76, 76);
     padding-left: 10%;
@@ -13,9 +11,4 @@
 .text {
     font-size: 20px;
     color: white;
-}
-
-.score {
-    font-size: 20px;
-    color: pink;
 }
